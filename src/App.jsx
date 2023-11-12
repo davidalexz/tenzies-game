@@ -23,7 +23,11 @@ function App() {
     }
 
     function holdDice(id) {
-        console.log(id);
+        setDiceNum((prevDice) =>
+            prevDice.map((die) => {
+                return die.id === id ? { ...die, isHeld: !die.isHeld } : die;
+            })
+        );
     }
 
     const diceElements = diceNum.map((die) => (
