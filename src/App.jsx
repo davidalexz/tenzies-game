@@ -6,20 +6,28 @@ import { nanoid } from 'nanoid';
 function App() {
     const [diceNum, setDiceNum] = React.useState(allNewDice());
 
+    function generateNewDie() {
+        return {
+            value: Math.ceil(Math.random() * 6),
+            isHeld: false,
+            id: nanoid(),
+        };
+    }
+
     function allNewDice() {
         let nums = [];
         for (let i = 0; i < 10; i++) {
-            nums.push({
-                value: Math.ceil(Math.random() * 6),
-                isHeld: false,
-                id: nanoid(),
-            });
+            nums.push(generateNewDie());
         }
         return nums;
     }
 
     function rollDice() {
-        setDiceNum(allNewDice());
+        setDiceNum((prevDice) =>
+            prevDice.map((die) => {
+                return die.isHeld ? die : generateNewDie();
+            })
+        );
     }
 
     function holdDice(id) {
