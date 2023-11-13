@@ -2,6 +2,7 @@ import React from 'react';
 import './App.css';
 import Dice from '../components/Dice.jsx';
 import { nanoid } from 'nanoid';
+import Confetti from 'react-confetti';
 
 function App() {
     const [diceNum, setDiceNum] = React.useState(allNewDice());
@@ -13,9 +14,10 @@ function App() {
         const everyValue = diceNum.every((die) => die.value === initValue);
         if (heldDice && everyValue) {
             setTenzies(true);
-            console.log('You Won ! ! !');
         }
     }, [diceNum]);
+
+    const buttonText = tenzies ? 'New Game' : 'Roll';
 
     function generateNewDie() {
         return {
@@ -34,11 +36,18 @@ function App() {
     }
 
     function rollDice() {
-        setDiceNum((prevDice) =>
-            prevDice.map((die) => {
-                return die.isHeld ? die : generateNewDie();
-            })
-        );
+        if (!tenzies) {
+            {
+                setDiceNum((prevDice) =>
+                    prevDice.map((die) => {
+                        return die.isHeld ? die : generateNewDie();
+                    })
+                );
+            }
+        } else {
+            setTenzies(false);
+            setDiceNum(allNewDice);
+        }
     }
 
     function holdDice(id) {
@@ -60,6 +69,7 @@ function App() {
 
     return (
         <main>
+            {tenzies && <Confetti />}
             <h1 className="" title>
                 Tenzies
             </h1>
@@ -68,7 +78,7 @@ function App() {
                 between rolls
             </p>
             <div className="dice-container">{diceElements}</div>
-            <button onClick={rollDice}>Roll</button>
+            <button onClick={rollDice}>{buttonText}</button>
         </main>
     );
 }
