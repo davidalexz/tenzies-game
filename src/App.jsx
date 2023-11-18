@@ -1,21 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Dice from '../components/Dice.jsx';
 import { nanoid } from 'nanoid';
 import Confetti from 'react-confetti';
 
 function App() {
-    const [diceNum, setDiceNum] = React.useState(allNewDice());
-    const [tenzies, setTenzies] = React.useState(false);
+    const [diceNum, setDiceNum] = useState(allNewDice());
+    const [tenzies, setTenzies] = useState(false);
+    const [timer, setTimer] = useState(false);
+    const [timeElapsed, setTimeElapsed] = useState(0);
 
-    React.useEffect(() => {
+    // Game finished effect, check if every dice is held & has the same value
+    useEffect(() => {
         const initValue = diceNum[0].value;
         const heldDice = diceNum.every((die) => die.isHeld);
         const everyValue = diceNum.every((die) => die.value === initValue);
         if (heldDice && everyValue) {
             setTenzies(true);
+            clearInterval(timer); // Stop the timer when the game is finished
         }
-    }, [diceNum]);
+    }, [diceNum, timer]);
+
+    // Function to start the timer
+    const startTimer = () => {
+        if (!timer) {
+            setTimer(
+                setInterval(() => {
+                    setTimeElapsed((prevTime) => prevTime + 1);
+                }, 1000)
+            );
+        }
+    };
 
     const buttonText = tenzies ? 'New Game' : 'Roll';
 
@@ -53,7 +68,15 @@ function App() {
     function holdDice(id) {
         setDiceNum((prevDice) =>
             prevDice.map((die) => {
-                return die.id === id ? { ...die, isHeld: !die.isHeld } : die;
+                if (die.id === id) {
+                    // Toggle isHeld and start the timer if it's not already running
+                    const updatedDie = { ...die, isHeld: !die.isHeld };
+                    if (updatedDie.isHeld) {
+                        startTimer();
+                    }
+                    return updatedDie;
+                }
+                return die;
             })
         );
     }
@@ -79,6 +102,9 @@ function App() {
             </p>
             <div className="dice-container">{diceElements}</div>
             <button onClick={rollDice}>{buttonText}</button>
+            <div className="timeWin">
+                <p>{timeElapsed} Seconds</p>
+            </div>
         </main>
     );
 }
